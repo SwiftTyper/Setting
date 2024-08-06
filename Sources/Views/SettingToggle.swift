@@ -13,6 +13,7 @@ import SwiftUI
  */
 public struct SettingToggle: View, Setting {
     public var id: AnyHashable?
+    public var icon: SettingIcon?
     public var title: String
     @Binding public var isOn: Bool
     public var horizontalSpacing = CGFloat(12)
@@ -21,6 +22,7 @@ public struct SettingToggle: View, Setting {
 
     public init(
         id: AnyHashable? = nil,
+        icon: SettingIcon? = nil,
         title: String,
         isOn: Binding<Bool>,
         horizontalSpacing: CGFloat = CGFloat(12),
@@ -29,6 +31,7 @@ public struct SettingToggle: View, Setting {
     ) {
         self.id = id
         self.title = title
+        self.icon = icon
         self._isOn = isOn
         self.horizontalSpacing = horizontalSpacing
         self.verticalPadding = verticalPadding
@@ -38,6 +41,7 @@ public struct SettingToggle: View, Setting {
     public var body: some View {
         SettingToggleView(
             title: title,
+            icon: icon,
             isOn: $isOn,
             horizontalSpacing: horizontalSpacing,
             verticalPadding: verticalPadding,
@@ -50,6 +54,7 @@ struct SettingToggleView: View {
     @Environment(\.edgePadding) var edgePadding
     
     let title: String
+    let icon: SettingIcon?
     @Binding var isOn: Bool
 
     var horizontalSpacing = CGFloat(12)
@@ -58,6 +63,10 @@ struct SettingToggleView: View {
 
     var body: some View {
         HStack(spacing: horizontalSpacing) {
+            if let icon {
+                SettingIconView(icon: icon)
+            }
+            
             Text(title)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)

@@ -182,6 +182,10 @@ struct SettingPickerView: View {
 
         case .menu:
             HStack(spacing: horizontalSpacing) {
+                if let icon {
+                    SettingIconView(icon: icon)
+                }
+            
                 Text(title)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -232,7 +236,7 @@ struct SettingPickerChoicesView: View {
     var choicesConfiguration: SettingPicker.ChoicesConfiguration
 
     var body: some View {
-        SettingPageView(title: title, navigationTitleDisplayMode: choicesConfiguration.pageNavigationTitleDisplayMode) {
+        SettingPageView(title: title, navigationTitleDisplayMode: choicesConfiguration.pageNavigationTitleDisplayMode) { _ in
             let settingGroupView = SettingGroupView(
                 header: choicesConfiguration.groupHeader,
                 footer: choicesConfiguration.groupFooter,

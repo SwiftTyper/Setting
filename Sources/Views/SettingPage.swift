@@ -20,7 +20,7 @@ public struct SettingPage: Setting {
     public var backgroundColor: Color?
     public var navigationTitleDisplayMode = NavigationTitleDisplayMode.automatic
     public var previewConfiguration = PreviewConfiguration()
-    @SettingBuilder public var tuple: SettingTupleView
+    @SettingBuilder public var tuple: (() -> Void) -> SettingTupleView
     
     public init(
         id: AnyHashable? = nil,
@@ -31,7 +31,7 @@ public struct SettingPage: Setting {
         backgroundColor: Color? = nil,
         navigationTitleDisplayMode: SettingPage.NavigationTitleDisplayMode = NavigationTitleDisplayMode.automatic,
         previewConfiguration: SettingPage.PreviewConfiguration = PreviewConfiguration(),
-        @SettingBuilder tuple: () -> SettingTupleView
+        @SettingBuilder tuple: @escaping (() -> Void) -> SettingTupleView
     ) {
         self.id = id
         self.title = title
@@ -41,7 +41,7 @@ public struct SettingPage: Setting {
         self.backgroundColor = backgroundColor
         self.navigationTitleDisplayMode = navigationTitleDisplayMode
         self.previewConfiguration = previewConfiguration
-        self.tuple = tuple()
+        self.tuple = tuple
     }
     
     public struct PreviewConfiguration {
@@ -102,6 +102,7 @@ public extension SettingPage {
 
 struct SettingPageView<Content>: View where Content: View {
     @Environment(\.settingBackgroundColor) var settingBackgroundColor
+    @Environment(\.dismiss) var dismiss
     
     var title: String
     var spacing = CGFloat(20)
@@ -109,7 +110,7 @@ struct SettingPageView<Content>: View where Content: View {
     var backgroundColor: Color?
     var navigationTitleDisplayMode = SettingPage.NavigationTitleDisplayMode.inline
     var isInitialPage = false
-    @ViewBuilder var content: Content
+    @ViewBuilder var content: (() -> Void) -> Content
     
     var body: some View {
 #if os(iOS)
@@ -151,13 +152,17 @@ struct SettingPageView<Content>: View where Content: View {
     var mainSettings: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: spacing) {
-                content
+                content(dismissAction)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, verticalPadding)
         }
         .background(backgroundColor ?? settingBackgroundColor)
         .navigationTitle(title)
+    }
+    
+    func dismissAction() {
+        dismiss()
     }
 }
 
@@ -216,12 +221,17 @@ public struct SettingPagePreviewView: View {
     }
 }
 
+extension DismissAction {
+}
+
 extension SettingPage {
     /// generate all possibile paths
     func generatePaths() -> [SettingPath] {
         var paths = [SettingPath]()
         
-        for setting in tuple.flattened {
+        let placeholderDismiss: () -> Void = {}
+        
+        for setting in tuple(placeholderDismiss).flattened {
             let initialItemPath = SettingPath(settings: [setting])
             let recursivePaths = generateRecursivePaths(for: initialItemPath)
             paths += recursivePaths
@@ -238,9 +248,10 @@ extension SettingPage {
         /// get the last setting, possibly a page
         guard let lastItem = path.settings.last else { return [] }
         
+        let placeholderDismiss: () -> Void = {}
         /// If the last setting is a page, travel through the page's subpages.
         if let page = lastItem as? SettingPage {
-            for setting in page.tuple.flattened {
+            for setting in page.tuple(placeholderDismiss).flattened {
                 /// If it's a subpage, generate paths for it.
                 if let page = setting as? SettingPage {
                     let currentPath = SettingPath(settings: path.settings + [page])
