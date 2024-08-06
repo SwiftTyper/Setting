@@ -236,7 +236,7 @@ struct SettingPickerChoicesView: View {
     var choicesConfiguration: SettingPicker.ChoicesConfiguration
 
     var body: some View {
-        SettingPageView(title: title, navigationTitleDisplayMode: choicesConfiguration.pageNavigationTitleDisplayMode) { _ in
+        SettingPageView(title: title, navigationTitleDisplayMode: choicesConfiguration.pageNavigationTitleDisplayMode) {
             let settingGroupView = SettingGroupView(
                 header: choicesConfiguration.groupHeader,
                 footer: choicesConfiguration.groupFooter,

@@ -78,8 +78,8 @@ public struct SettingView: View {
                     backgroundColor: page.backgroundColor,
                     navigationTitleDisplayMode: page.navigationTitleDisplayMode,
                     isInitialPage: isInitialPage
-                ) { dismiss in
-                    ForEach(page.tuple(dismiss).settings, id: \.identifier) { setting in
+                ) {
+                    ForEach(page.tuple.settings, id: \.identifier) { setting in
                         SettingView(setting: setting, isPagePreview: true)
                     }
                 }
